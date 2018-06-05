@@ -17,3 +17,9 @@ if !(a = Array.new).respond_to?(:sample) && a.respond_to?(:choice)
     alias_method :sample, :choice
   end
 end
+
+# unstub all test stubs automatically for Assert test suite
+require 'assert'
+class Assert::Context
+  teardown{ MuchStub.unstub! }
+end
