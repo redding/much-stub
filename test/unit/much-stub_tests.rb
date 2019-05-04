@@ -23,20 +23,23 @@ module MuchStub
     end
 
     should "build a stub" do
-      stub1 = MuchStub.stub(@myobj, :mymeth)
+      stub1 = MuchStub.(@myobj, :mymeth)
       assert_kind_of MuchStub::Stub, stub1
+
+      stub2 = MuchStub.call(@myobj, :mymeth)
+      assert_kind_of MuchStub::Stub, stub2
     end
 
     should "lookup stubs that have been called before" do
-      stub1 = MuchStub.stub(@myobj, :mymeth)
-      stub2 = MuchStub.stub(@myobj, :mymeth)
+      stub1 = MuchStub.(@myobj, :mymeth)
+      stub2 = MuchStub.(@myobj, :mymeth)
       assert_same stub1, stub2
     end
 
     should "set the stub's do block if given a block" do
-      MuchStub.stub(@myobj, :mymeth)
+      MuchStub.(@myobj, :mymeth)
       assert_raises(MuchStub::NotStubbedError){ @myobj.mymeth }
-      MuchStub.stub(@myobj, :mymeth){ @stub_value }
+      MuchStub.(@myobj, :mymeth){ @stub_value }
       assert_equal @stub_value, @myobj.mymeth
     end
 
@@ -46,7 +49,7 @@ module MuchStub
       assert_equal @orig_value, @myobj.mymeth
 
       assert_equal @orig_value, @myobj.mymeth
-      MuchStub.stub(@myobj, :mymeth){ @stub_value }
+      MuchStub.(@myobj, :mymeth){ @stub_value }
       assert_equal @stub_value, @myobj.mymeth
       MuchStub.unstub(@myobj, :mymeth)
       assert_equal @orig_value, @myobj.mymeth
@@ -55,7 +58,7 @@ module MuchStub
     should "know and teardown all stubs" do
       assert_equal @orig_value, @myobj.mymeth
 
-      MuchStub.stub(@myobj, :mymeth){ @stub_value }
+      MuchStub.(@myobj, :mymeth){ @stub_value }
       assert_equal @stub_value, @myobj.mymeth
       assert_equal 1, MuchStub.stubs.size
 
@@ -69,7 +72,7 @@ module MuchStub
       assert_includes 'not stubbed.',                 err.message
       assert_includes 'test/unit/much-stub_tests.rb', err.backtrace.first
 
-      MuchStub.stub(@myobj, :mymeth){ @stub_value }
+      MuchStub.(@myobj, :mymeth){ @stub_value }
 
       assert_equal @stub_value, @myobj.mymeth
       assert_equal @orig_value, MuchStub.stub_send(@myobj, :mymeth)
