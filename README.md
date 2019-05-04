@@ -14,6 +14,8 @@ Note: this was originally implemented in and extracted from [Assert](https://git
 ## Usage
 
 ```ruby
+# Given this object/API
+
 myclass = Class.new do
   def mymeth; 'meth'; end
   def myval(val); val; end
@@ -26,6 +28,8 @@ myobj.myval(123)
   # => 123
 myobj.myval(456)
   # => 456
+
+# Create a new stub for the :mymeth method
 
 MuchStub.(myobj, :mymeth)
 myobj.mymeth
@@ -40,6 +44,8 @@ MuchStub.(myobj, :mymeth).with(123){ 'stub-meth' }
 MuchStub.stub_send(myobj, :mymeth) # call to the original method post-stub
   # => 'meth'
 
+# Create a new stub for the :myval method
+
 MuchStub.(myobj, :myval){ 'stub-meth' }
   # => StubError: arity mismatch
 MuchStub.(myobj, :myval).with(123){ |val| val.to_s }
@@ -49,13 +55,24 @@ myobj.myval(123)
   # => '123'
 myobj.myval(456)
   # => StubError: `myval(456)` not stubbed.
-MuchStub.stub_send(myobj, :myval, 123) # call to the original method post-stub
+
+# Call to the original method post-stub
+
+MuchStub.stub_send(myobj, :myval, 123)
   # => 123
 MuchStub.stub_send(myobj, :myval, 456)
   # => 456
 
+# Unstub individual stubs
+
 MuchStub.unstub(myobj, :mymeth)
 MuchStub.unstub(myobj, :myval)
+
+# OR blanket unstub all stubs
+
+MuchStub.unstub!
+
+# Original API is preserved after unstubbing
 
 myobj.mymeth
   # => 'meth'
