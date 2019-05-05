@@ -6,18 +6,23 @@ module MuchStub
     @stubs ||= {}
   end
 
+  def self.stub_key(obj, meth)
+    MuchStub::Stub.key(obj, meth)
+  end
+
   def self.call(*args, &block)
     self.stub(*args, &block)
   end
 
   def self.stub(obj, meth, &block)
-    (self.stubs[MuchStub::Stub.key(obj, meth)] ||= begin
-      MuchStub::Stub.new(obj, meth, caller_locations)
-    end).tap{ |s| s.do = block }
+    key = self.stub_key(obj, meth)
+    self.stubs[key] ||= MuchStub::Stub.new(obj, meth, caller_locations)
+    self.stubs[key].tap{ |s| s.do = block }
   end
 
   def self.unstub(obj, meth)
-    (self.stubs.delete(MuchStub::Stub.key(obj, meth)) || MuchStub::NullStub.new).teardown
+    key = self.stub_key(obj, meth)
+    (self.stubs.delete(key) || MuchStub::NullStub.new).teardown
   end
 
   def self.unstub!
@@ -71,7 +76,7 @@ module MuchStub
         raise StubArityError, msg, orig_caller.map(&:to_s)
       end
       lookup(args, orig_caller).call(*args, &block)
-    rescue NotStubbedError => exception
+    rescue NotStubbedError
       @lookup.rehash
       lookup(args, orig_caller).call(*args, &block)
     end
