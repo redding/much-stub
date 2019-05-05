@@ -6,6 +6,10 @@ module MuchStub
     @stubs ||= {}
   end
 
+  def self.call(*args, &block)
+    self.stub(*args, &block)
+  end
+
   def self.stub(obj, meth, &block)
     (self.stubs[MuchStub::Stub.key(obj, meth)] ||= begin
       MuchStub::Stub.new(obj, meth, caller_locations)

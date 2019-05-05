@@ -14,6 +14,8 @@ Note: this was originally implemented in and extracted from [Assert](https://git
 ## Usage
 
 ```ruby
+# Given this object/API
+
 myclass = Class.new do
   def mymeth; 'meth'; end
   def myval(val); val; end
@@ -27,35 +29,50 @@ myobj.myval(123)
 myobj.myval(456)
   # => 456
 
-MuchStub.stub(myobj, :mymeth)
+# Create a new stub for the :mymeth method
+
+MuchStub.(myobj, :mymeth)
 myobj.mymeth
   # => StubError: `mymeth` not stubbed.
-MuchStub.stub(myobj, :mymeth){ 'stub-meth' }
+MuchStub.(myobj, :mymeth){ 'stub-meth' }
 myobj.mymeth
   # => 'stub-meth'
 myobj.mymeth(123)
   # => StubError: arity mismatch
-MuchStub.stub(myobj, :mymeth).with(123){ 'stub-meth' }
+MuchStub.(myobj, :mymeth).with(123){ 'stub-meth' }
   # => StubError: arity mismatch
 MuchStub.stub_send(myobj, :mymeth) # call to the original method post-stub
   # => 'meth'
 
-MuchStub.stub(myobj, :myval){ 'stub-meth' }
+# Create a new stub for the :myval method
+
+MuchStub.(myobj, :myval){ 'stub-meth' }
   # => StubError: arity mismatch
-MuchStub.stub(myobj, :myval).with(123){ |val| val.to_s }
+MuchStub.(myobj, :myval).with(123){ |val| val.to_s }
 myobj.myval
   # => StubError: arity mismatch
 myobj.myval(123)
   # => '123'
 myobj.myval(456)
   # => StubError: `myval(456)` not stubbed.
-MuchStub.stub_send(myobj, :myval, 123) # call to the original method post-stub
+
+# Call to the original method post-stub
+
+MuchStub.stub_send(myobj, :myval, 123)
   # => 123
 MuchStub.stub_send(myobj, :myval, 456)
   # => 456
 
+# Unstub individual stubs
+
 MuchStub.unstub(myobj, :mymeth)
 MuchStub.unstub(myobj, :myval)
+
+# OR blanket unstub all stubs
+
+MuchStub.unstub!
+
+# Original API is preserved after unstubbing
 
 myobj.mymeth
   # => 'meth'
