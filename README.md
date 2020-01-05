@@ -187,6 +187,85 @@ thing.built_with
   # => [123]
 ```
 
+### `MuchStub.tap`
+
+Use the `.tap` method to spy on method calls while preserving the original method return value and behavior.
+
+```ruby
+# Given this object/API
+
+my_class = Class.new do
+  def basic_method(value)
+    value.to_s
+  end
+end
+my_object = my_class.new
+
+# Normal stubs override the original behavior and return value...
+basic_method_called_with = nil
+MuchStub.(my_object, :basic_method) { |*args|
+  basic_method_called_with = args
+}
+
+# ... in this case not converting the value to a String and returning it and
+# instead returning the arguments passed to the method.
+my_object.basic_method(123)
+  # => [123]
+basic_method_called_with
+  # => [123]
+
+# Use `MuchStub.tap` to preserve the methods behavior and also spy.
+
+basic_method_called_with = nil
+MuchStub.tap(my_object, :basic_method) { |value, *args|
+  basic_method_called_with = args
+}
+
+my_object.basic_method(123)
+  # => "123"
+basic_method_called_with
+  # => [123]
+```
+
+#### Late-bound stubs using `MuchStub.tap`
+
+Use the `.tap` method to stub any return values of method calls.
+
+```ruby
+# Given:
+
+class Thing
+  attr_reader :value
+
+  def initialize(value)
+    @value = value
+  end
+end
+
+my_class = Class.new do
+  def thing(value)
+    Thing.new(value)
+  end
+end
+my_object = my_class.new
+
+# Use `MuchStub.tap` to stub any thing instances created by `my_object.thing`
+# (and also spy on the call arguments)
+
+thing_built_with = nil
+MuchStub.tap(my_object, :thing) { |thing, *args|
+  thing_built_with = args
+  MuchStub.(thing, :value) { 456 }
+}
+
+thing = my_object.thing(123)
+  # => #<Thing:0x00007fd5ca9df510 @value=123>
+thing_built_with
+  # => [123]
+thing.value
+  # => 456
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:

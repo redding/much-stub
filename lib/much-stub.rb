@@ -36,6 +36,14 @@ module MuchStub
     stub.call_method(args, &block)
   end
 
+  def self.tap(obj, meth, &tap_block)
+    self.stub(obj, meth) { |*args, &block|
+      self.stub_send(obj, meth, *args, &block).tap { |value|
+        tap_block.call(value, *args, &block) if tap_block
+      }
+    }
+  end
+
   class Stub
     def self.key(object, method_name)
       "--#{object.object_id}--#{method_name}--"
