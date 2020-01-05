@@ -16,70 +16,175 @@ Note: this was originally implemented in and extracted from [Assert](https://git
 ```ruby
 # Given this object/API
 
-myclass = Class.new do
-  def mymeth; "meth"; end
-  def myval(val); val; end
-end
-myobj = myclass.new
+my_class = Class.new do
+  def my_method
+    "my-method"
+  end
 
-myobj.mymeth
-  # => "meth"
-myobj.myval(123)
+  def my_value(value)
+    value
+  end
+end
+my_object = my_class.new
+
+my_object.my_method
+  # => "my-method"
+my_object.my_value(123)
   # => 123
-myobj.myval(456)
+my_object.my_value(456)
   # => 456
 
-# Create a new stub for the :mymeth method
+# Create a new stub for the :my_method method
 
-MuchStub.(myobj, :mymeth)
-myobj.mymeth
-  # => StubError: `mymeth` not stubbed.
-MuchStub.(myobj, :mymeth){ "stub-meth" }
-myobj.mymeth
-  # => "stub-meth"
-myobj.mymeth(123)
+MuchStub.(my_object, :my_method)
+my_object.my_method
+  # => StubError: `my_method` not stubbed.
+MuchStub.(my_object, :my_method){ "stubbed-method" }
+my_object.my_method
+  # => "stubbed-method"
+my_object.my_method(123)
   # => StubError: arity mismatch
-MuchStub.(myobj, :mymeth).with(123){ "stub-meth" }
+MuchStub.(my_object, :my_method).with(123){ "stubbed-method" }
   # => StubError: arity mismatch
-MuchStub.stub_send(myobj, :mymeth) # call to the original method post-stub
-  # => "meth"
 
-# Create a new stub for the :myval method
+# Call the original method after it has been stubbed.
 
-MuchStub.(myobj, :myval){ "stub-meth" }
+MuchStub.stub_send(my_object, :my_method)
+  # => "my-method"
+
+# Create a new stub for the :my_value method
+
+MuchStub.(my_object, :my_value){ "stubbed-method" }
   # => StubError: arity mismatch
-MuchStub.(myobj, :myval).with(123){ |val| val.to_s }
-myobj.myval
+MuchStub.(my_object, :my_value).with(123){ |val| val.to_s }
+my_object.my_value
   # => StubError: arity mismatch
-myobj.myval(123)
+my_object.my_value(123)
   # => "123"
-myobj.myval(456)
-  # => StubError: `myval(456)` not stubbed.
+my_object.my_value(456)
+  # => StubError: `my_value(456)` not stubbed.
 
-# Call to the original method post-stub
+# Call the original method after it has been stubbed.
 
-MuchStub.stub_send(myobj, :myval, 123)
+MuchStub.stub_send(my_object, :my_value, 123)
   # => 123
-MuchStub.stub_send(myobj, :myval, 456)
+MuchStub.stub_send(my_object, :my_value, 456)
   # => 456
 
 # Unstub individual stubs
 
-MuchStub.unstub(myobj, :mymeth)
-MuchStub.unstub(myobj, :myval)
+MuchStub.unstub(my_object, :my_method)
+MuchStub.unstub(my_object, :my_value)
 
 # OR blanket unstub all stubs
 
 MuchStub.unstub!
 
-# Original API is preserved after unstubbing
+# The original API/behavior is preserved after unstubbing
 
-myobj.mymeth
-  # => "meth"
-myobj.myval(123)
+my_object.my_method
+  # => "my-method"
+my_object.my_value(123)
   # => 123
-myobj.myval(456)
+my_object.my_value(456)
   # => 456
+```
+
+### Stubs for spying
+
+```ruby
+# Given this object/API
+
+my_class = Class.new do
+  def basic_method(value)
+    value
+  end
+
+  def iterator_method(items, &block)
+    items.each(&block)
+  end
+end
+my_object = my_class.new
+
+# Store method call arguments/blocks for spying.
+
+basic_method_called_with = nil
+MuchStub.(my_object, :basic_method) { |*args|
+  basic_method_called_with = args
+}
+
+my_object.basic_method(123)
+basic_method_called_with
+  # => [123]
+
+iterator_method_call_args = nil
+iterator_method_call_block = nil
+MuchStub.(my_object, :iterator_method) { |*args, &block|
+  iterator_method_call_args = args
+  iterator_method_call_block = block
+}
+
+my_object.iterator_method([1, 2, 3], &:to_s)
+iterator_method_call_args
+  # => [[1, 2, 3]]
+iterator_method_call_block
+  # => #<Proc:0x00007fb083a6feb0(&:to_s)>
+
+# Count method calls for spying.
+
+basic_method_call_count = 0
+MuchStub.(my_object, :basic_method) {
+  basic_method_call_count += 1
+}
+
+my_object.basic_method(123)
+basic_method_call_count
+  # => 1
+
+# Count method calls and store arguments for spying.
+
+basic_method_calls = []
+MuchStub.(my_object, :basic_method) { |*args|
+  basic_method_calls << args
+}
+
+my_object.basic_method(123)
+basic_method_calls.size
+  # => 1
+basic_method_calls.first
+  # => [123]
+```
+
+### Stubs for test doubles.
+
+```ruby
+# Given this object/API ...
+
+my_class = Class.new do
+  def build_thing(thing_value);
+    Thing.new(value)
+  end
+end
+my_object = my_class.new
+
+# ... and this Test Double.
+class FakeThing
+  attr_reader :built_with
+
+  def initialize(*args)
+    @built_with = args
+  end
+end
+
+# Stub in the test double.
+
+MuchStub.(my_object, :build_thing) { |*args|
+  FakeThing.new(*args)
+}
+
+thing = my_object.build_thing(123)
+thing.built_with
+  # => [123]
 ```
 
 ## Installation
