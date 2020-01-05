@@ -1,7 +1,6 @@
 require "much-stub/version"
 
 module MuchStub
-
   def self.stubs
     @stubs ||= {}
   end
@@ -38,7 +37,6 @@ module MuchStub
   end
 
   class Stub
-
     def self.key(object, method_name)
       "--#{object.object_id}--#{method_name}--"
     end
@@ -100,7 +98,7 @@ module MuchStub
     end
 
     def inspect
-      "#<#{self.class}:#{'0x0%x' % (object_id << 1)}" \
+      "#<#{self.class}:#{"0x0%x" % (object_id << 1)}" \
       " @method_name=#{@method_name.inspect}" \
       ">"
     end
@@ -159,7 +157,7 @@ module MuchStub
     end
 
     def inspect_call(args)
-      "`#{@method_name}(#{args.map(&:inspect).join(',')})`"
+      "`#{@method_name}(#{args.map(&:inspect).join(",")})`"
     end
 
     def number_of_args(arity)
@@ -169,7 +167,6 @@ module MuchStub
         arity
       end
     end
-
   end
 
   StubError       = Class.new(ArgumentError)
@@ -181,15 +178,14 @@ module MuchStub
   end
 
   module ParameterList
-
-    LETTERS = ('a'..'z').to_a.freeze
+    LETTERS = ("a".."z").to_a.freeze
 
     def self.new(object, method_name)
       arity = get_arity(object, method_name)
       params = build_params_from_arity(arity)
-      params << '*args' if arity < 0
-      params << '&block'
-      params.join(', ')
+      params << "*args" if arity < 0
+      params << "&block"
+      params.join(", ")
     end
 
     private
@@ -210,9 +206,7 @@ module MuchStub
       number_of_letters, letter_index = param_index.divmod(LETTERS.size)
       LETTERS[letter_index] * number_of_letters
     end
-
   end
-
 end
 
 # Kernel#caller_locations polyfill for pre ruby 2.0.0

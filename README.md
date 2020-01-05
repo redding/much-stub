@@ -17,13 +17,13 @@ Note: this was originally implemented in and extracted from [Assert](https://git
 # Given this object/API
 
 myclass = Class.new do
-  def mymeth; 'meth'; end
+  def mymeth; "meth"; end
   def myval(val); val; end
 end
 myobj = myclass.new
 
 myobj.mymeth
-  # => 'meth'
+  # => "meth"
 myobj.myval(123)
   # => 123
 myobj.myval(456)
@@ -34,25 +34,25 @@ myobj.myval(456)
 MuchStub.(myobj, :mymeth)
 myobj.mymeth
   # => StubError: `mymeth` not stubbed.
-MuchStub.(myobj, :mymeth){ 'stub-meth' }
+MuchStub.(myobj, :mymeth){ "stub-meth" }
 myobj.mymeth
-  # => 'stub-meth'
+  # => "stub-meth"
 myobj.mymeth(123)
   # => StubError: arity mismatch
-MuchStub.(myobj, :mymeth).with(123){ 'stub-meth' }
+MuchStub.(myobj, :mymeth).with(123){ "stub-meth" }
   # => StubError: arity mismatch
 MuchStub.stub_send(myobj, :mymeth) # call to the original method post-stub
-  # => 'meth'
+  # => "meth"
 
 # Create a new stub for the :myval method
 
-MuchStub.(myobj, :myval){ 'stub-meth' }
+MuchStub.(myobj, :myval){ "stub-meth" }
   # => StubError: arity mismatch
 MuchStub.(myobj, :myval).with(123){ |val| val.to_s }
 myobj.myval
   # => StubError: arity mismatch
 myobj.myval(123)
-  # => '123'
+  # => "123"
 myobj.myval(456)
   # => StubError: `myval(456)` not stubbed.
 
@@ -75,7 +75,7 @@ MuchStub.unstub!
 # Original API is preserved after unstubbing
 
 myobj.mymeth
-  # => 'meth'
+  # => "meth"
 myobj.myval(123)
   # => 123
 myobj.myval(456)
@@ -86,7 +86,7 @@ myobj.myval(456)
 
 Add this line to your application's Gemfile:
 
-    gem 'much-stub'
+    gem "much-stub"
 
 And then execute:
 
@@ -100,6 +100,6 @@ Or install it yourself as:
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
+3. Commit your changes (`git commit -am "Added some feature"`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
