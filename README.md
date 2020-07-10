@@ -110,24 +110,22 @@ my_object = my_class.new
 
 basic_method_called_with = nil
 MuchStub.(my_object, :basic_method) { |*args|
-  basic_method_called_with = args
+  basic_method_called_with = MuchStub::Call.new(*args)
 }
 
 my_object.basic_method(123)
-basic_method_called_with
+basic_method_called_with.args
   # => [123]
 
-iterator_method_call_args = nil
-iterator_method_call_block = nil
+iterator_method_called_with = nil
 MuchStub.(my_object, :iterator_method) { |*args, &block|
-  iterator_method_call_args = args
-  iterator_method_call_block = block
+  iterator_method_called_with = MuchStub::Call.new(*args)
 }
 
 my_object.iterator_method([1, 2, 3], &:to_s)
-iterator_method_call_args
+iterator_method_called_with.args
   # => [[1, 2, 3]]
-iterator_method_call_block
+iterator_method_called_with.block
   # => #<Proc:0x00007fb083a6feb0(&:to_s)>
 
 # Count method calls for spying.
@@ -145,13 +143,13 @@ basic_method_call_count
 
 basic_method_calls = []
 MuchStub.(my_object, :basic_method) { |*args|
-  basic_method_calls << args
+  basic_method_calls << MuchStub::Call.new(*args)
 }
 
 my_object.basic_method(123)
 basic_method_calls.size
   # => 1
-basic_method_calls.first
+basic_method_calls.first.args
   # => [123]
 ```
 

@@ -1,4 +1,5 @@
 require "much-stub/version"
+require "much-stub/call"
 
 module MuchStub
   def self.stubs
