@@ -1,5 +1,7 @@
 require "much-stub/version"
+
 require "much-stub/call"
+require "much-stub/call_spy"
 
 module MuchStub
   def self.stubs
@@ -55,6 +57,16 @@ module MuchStub
     self.tap(obj, meth) { |value, *args, &block|
       on_call_block.call(value, MuchStub::Call.new(*args, &block)) if on_call_block
     }
+  end
+
+  def self.spy(obj, *meths, **return_values)
+    MuchStub::CallSpy.new(**return_values).tap do |spy|
+      meths.each do |meth|
+        self.stub(obj, meth) { |*args, &block|
+          spy.public_send(meth, *args, &block)
+        }
+      end
+    end
   end
 
   class Stub

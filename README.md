@@ -293,6 +293,39 @@ thing.value
   # => 456
 ```
 
+### `MuchStub.spy`
+
+Use the `.spy` method to spy on method calls. This is especially helpful for spying on _chained_ method calls.
+
+```ruby
+# Given this object/API
+
+myclass = Class.new do
+  def one; self; end
+  def two(val); self; end
+  def three; self; end
+  def ready?; false; end
+end
+myobj = myclass.new
+
+spy =
+  MuchStub.spy(myobj :one, :two, :three, ready?: true)
+
+assert_equal spy, myobj.one
+assert_equal spy, myobj.two("a")
+assert_equal spy, myobj.three
+
+assert_true myobj.one.two("b").three.ready?
+
+assert_kind_of MuchStub::CallSpy, spy
+assert_equal 2, spy.one_call_count
+assert_equal 2, spy.two_call_count
+assert_equal 2, spy.three_call_count
+assert_equal 1, spy.ready_predicate_call_count
+assert_equal ["b"], spy.two_last_called_with.args
+assert_true spy.ready_predicate_called?
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
