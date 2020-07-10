@@ -9,6 +9,12 @@ module MuchStub
     MuchStub::Stub.key(obj, meth)
   end
 
+  def self.arity_matches?(method, args)
+    return true if method.arity == args.size # mandatory args
+    return true if method.arity < 0 && args.size >= (method.arity+1).abs # variable args
+    return false
+  end
+
   def self.call(*args, &block)
     self.stub(*args, &block)
   end
@@ -75,11 +81,13 @@ module MuchStub
 
     def call(args, orig_caller = nil, &block)
       orig_caller ||= caller_locations
-      unless arity_matches?(args)
-        msg = "arity mismatch on `#{@method_name}`: " \
-              "expected #{number_of_args(@method.arity)}, " \
-              "called with #{args.size}"
-        raise StubArityError, msg, orig_caller.map(&:to_s)
+      unless MuchStub.arity_matches?(@method, args)
+        raise(
+          StubArityError.new(
+            @method,
+            args,
+            method_name: @method_name,
+            backtrace: orig_caller))
       end
       lookup(args, orig_caller).call(*args, &block)
     rescue NotStubbedError
@@ -89,11 +97,13 @@ module MuchStub
 
     def with(*args, &block)
       orig_caller = caller_locations
-      unless arity_matches?(args)
-        msg = "arity mismatch on `#{@method_name}`: " \
-              "expected #{number_of_args(@method.arity)}, " \
-              "stubbed with #{args.size}"
-        raise StubArityError, msg, orig_caller.map(&:to_s)
+      unless MuchStub.arity_matches?(@method, args)
+        raise(
+          StubArityError.new(
+            @method,
+            args,
+            method_name: @method_name,
+            backtrace: orig_caller))
       end
       @lookup[args] = block
     end
@@ -154,12 +164,6 @@ module MuchStub
       end
     end
 
-    def arity_matches?(args)
-      return true if @method.arity == args.size # mandatory args
-      return true if @method.arity < 0 && args.size >= (@method.arity+1).abs # variable args
-      return false
-    end
-
     def inspect_lookup_stubs
       @lookup.keys.map{ |args| "    - #{inspect_call(args)}" }.join("\n")
     end
@@ -167,19 +171,31 @@ module MuchStub
     def inspect_call(args)
       "`#{@method_name}(#{args.map(&:inspect).join(",")})`"
     end
-
-    def number_of_args(arity)
-      if arity < 0
-        "at least #{(arity + 1).abs}"
-      else
-        arity
-      end
-    end
   end
 
   StubError       = Class.new(ArgumentError)
   NotStubbedError = Class.new(StubError)
-  StubArityError  = Class.new(StubError)
+  StubArityError  =
+    Class.new(StubError) do
+      def initialize(method, args, method_name:, backtrace:)
+        msg = "arity mismatch on `#{method_name}`: " \
+              "expected #{number_of_args(method.arity)}, " \
+              "called with #{args.size}"
+
+        super(msg)
+        set_backtrace(Array(backtrace).map(&:to_s))
+      end
+
+      private
+
+      def number_of_args(arity)
+        if arity < 0
+          "at least #{(arity + 1).abs}"
+        else
+          arity
+        end
+      end
+    end
 
   NullStub = Class.new do
     def teardown; end # no-op
