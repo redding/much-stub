@@ -107,6 +107,20 @@ module MuchStub
             backtrace: orig_caller))
       end
       @lookup[args] = block
+      self
+    end
+
+    def on_call(&on_call_block)
+      stub_block =
+        ->(*args, &block) {
+          on_call_block.call(MuchStub::Call.new(*args, &block)) if on_call_block
+        }
+      if @lookup.empty?
+        @do = stub_block
+      elsif @lookup.has_value?(nil)
+        @lookup.transform_values!{ |value| value.nil? ? stub_block : value }
+      end
+      self
     end
 
     def teardown
@@ -154,7 +168,7 @@ module MuchStub
     end
 
     def lookup(args, orig_caller)
-      @lookup.fetch(args) do
+      @lookup.fetch(args) {
         self.do || begin
           msg = "#{inspect_call(args)} not stubbed."
           inspect_lookup_stubs.tap do |stubs|
@@ -162,7 +176,11 @@ module MuchStub
           end
           raise NotStubbedError, msg, orig_caller.map(&:to_s)
         end
-      end
+      } ||
+        raise(
+          StubError,
+          "#{inspect_call(args)} stubbed with no block.",
+          orig_caller.map(&:to_s))
     end
 
     def inspect_lookup_stubs

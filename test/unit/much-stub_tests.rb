@@ -134,19 +134,24 @@ module MuchStub
         @myobj.mymeth
       end
 
+      MuchStub::Stub.new(@myobj, :mymeth){ "mymeth" }
       assert_nothing_raised do
-        MuchStub::Stub.new(@myobj, :mymeth){ "mymeth" }
+        @myobj.mymeth
       end
+    end
+
+    should "complain when called if no lookup block was given" do
+      MuchStub::Stub.new(@myobj, :myval).with(1)
+
+      err = assert_raises(MuchStub::StubError){ @myobj.myval(1) }
+      assert_includes "stubbed with no block.",       err.message
+      assert_includes "test/unit/much-stub_tests.rb", err.backtrace.first
     end
 
     should "complain if stubbing a method that the object doesn't respond to" do
       err = assert_raises(MuchStub::StubError){ MuchStub::Stub.new(@myobj, :some_other_meth) }
       assert_includes "does not respond to",     err.message
       assert_includes "test/unit/much-stub_tests.rb", err.backtrace.first
-    end
-
-    should "complain if stubbed and called with no `do` proc given" do
-      assert_raises(MuchStub::NotStubbedError){ @myobj.mymeth }
     end
 
     should "complain if stubbed and called with mismatched arity" do
@@ -227,20 +232,29 @@ module MuchStub
 
     should "stub methods with variable args" do
       assert_equal [1,2], @myobj.myargs(1,2)
+
       stub = MuchStub::Stub.new(@myobj, :myargs){ |*args| args.join(",") }
-      assert_equal "1,2", @myobj.myargs(1,2)
-      assert_equal "3,4,5", @myobj.myargs(3,4,5)
-      stub.with(3,4,5){ "three-four-five" }
-      assert_equal "three-four-five", @myobj.myargs(3,4,5)
+      assert_equal "1,2,3", @myobj.myargs(1,2,3)
+      stub.with(3,4,5){ |*args| args.join(":") }
+      assert_equal "3:4:5", @myobj.myargs(3,4,5)
+
+      stub = MuchStub::Stub.new(@myobj, :myargs).on_call{ |call| call.args.join(",") }
+      assert_equal "1,2,3", @myobj.myargs(1,2,3)
+      stub.with(3,4,5).on_call{ |call| call.args.join(":") }
+      assert_equal "3:4:5", @myobj.myargs(3,4,5)
     end
 
     should "stub methods with required args and variable args" do
       assert_equal [1,2, [3]], @myobj.myvalargs(1,2,3)
       stub = MuchStub::Stub.new(@myobj, :myvalargs){ |*args| args.join(",") }
       assert_equal "1,2,3", @myobj.myvalargs(1,2,3)
-      assert_equal "3,4,5", @myobj.myvalargs(3,4,5)
-      stub.with(3,4,5){ "three-four-five" }
-      assert_equal "three-four-five", @myobj.myvalargs(3,4,5)
+      stub.with(3,4,5){ |*args| args.join(":") }
+      assert_equal "3:4:5", @myobj.myvalargs(3,4,5)
+
+      stub = MuchStub::Stub.new(@myobj, :myvalargs).on_call{ |call| call.args.join(",") }
+      assert_equal "1,2,3", @myobj.myvalargs(1,2,3)
+      stub.with(3,4,5).on_call{ |call| call.args.join(":") }
+      assert_equal "3:4:5", @myobj.myvalargs(3,4,5)
     end
 
     should "stub methods that yield blocks" do
@@ -325,7 +339,7 @@ module MuchStub
       assert_equal true, blkcalled
     end
 
-    should "store and remove itself on asserts main module" do
+    should "store and remove itself" do
       assert_equal subject, MuchStub.instance_variable_get(subject.ivar_name)
       subject.teardown
       assert_nil MuchStub.instance_variable_get(subject.ivar_name)

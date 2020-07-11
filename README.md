@@ -112,14 +112,35 @@ basic_method_called_with = nil
 MuchStub.(my_object, :basic_method) { |*args|
   basic_method_called_with = MuchStub::Call.new(*args)
 }
+# OR
+MuchStub.(my_object, :basic_method).on_call { |call|
+  basic_method_called_with = call
+}
 
 my_object.basic_method(123)
 basic_method_called_with.args
   # => [123]
 
+basic_method_called_with = nil
+MuchStub.(my_object, :basic_method).with(4, 5, 6) { |*args|
+  basic_method_called_with = MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.(my_object, :basic_method).with(4, 5, 6).on_call { |call|
+  basic_method_called_with = call
+}
+
+my_object.basic_method(4, 5, 6)
+basic_method_called_with.args
+  # => [4,5,6]
+
 iterator_method_called_with = nil
 MuchStub.(my_object, :iterator_method) { |*args, &block|
   iterator_method_called_with = MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.(my_object, :iterator_method).on_call { |call|
+  iterator_method_called_with = call
 }
 
 my_object.iterator_method([1, 2, 3], &:to_s)
@@ -144,6 +165,10 @@ basic_method_call_count
 basic_method_calls = []
 MuchStub.(my_object, :basic_method) { |*args|
   basic_method_calls << MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.(my_object, :basic_method).on_call { |call|
+  basic_method_calls << call
 }
 
 my_object.basic_method(123)
