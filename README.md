@@ -241,12 +241,16 @@ basic_method_called_with
 
 basic_method_called_with = nil
 MuchStub.tap(my_object, :basic_method) { |value, *args|
-  basic_method_called_with = args
+  basic_method_called_with = MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.tap_on_call(my_object, :basic_method) { |value, call|
+  basic_method_called_with = call
 }
 
 my_object.basic_method(123)
   # => "123"
-basic_method_called_with
+basic_method_called_with.args
   # => [123]
 ```
 

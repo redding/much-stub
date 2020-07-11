@@ -51,6 +51,12 @@ module MuchStub
     }
   end
 
+  def self.tap_on_call(obj, meth, &on_call_block)
+    self.tap(obj, meth) { |value, *args, &block|
+      on_call_block.call(value, MuchStub::Call.new(*args, &block)) if on_call_block
+    }
+  end
+
   class Stub
     def self.key(object, method_name)
       "--#{object.object_id}--#{method_name}--"

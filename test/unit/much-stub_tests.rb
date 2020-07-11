@@ -86,6 +86,16 @@ module MuchStub
       assert_equal @orig_value, @myobj.mymeth
       assert_equal [], my_meth_called_with
     end
+
+    should "be able to add a stub tap with an on_call block" do
+      my_meth_called_with = nil
+      MuchStub.tap_on_call(@myobj, :mymeth){ |value, call|
+        my_meth_called_with = call
+      }
+
+      assert_equal @orig_value, @myobj.mymeth
+      assert_equal [], my_meth_called_with.args
+    end
   end
 
   class StubTests < UnitTests
