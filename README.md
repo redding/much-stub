@@ -110,24 +110,43 @@ my_object = my_class.new
 
 basic_method_called_with = nil
 MuchStub.(my_object, :basic_method) { |*args|
-  basic_method_called_with = args
+  basic_method_called_with = MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.(my_object, :basic_method).on_call { |call|
+  basic_method_called_with = call
 }
 
 my_object.basic_method(123)
-basic_method_called_with
+basic_method_called_with.args
   # => [123]
 
-iterator_method_call_args = nil
-iterator_method_call_block = nil
+basic_method_called_with = nil
+MuchStub.(my_object, :basic_method).with(4, 5, 6) { |*args|
+  basic_method_called_with = MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.(my_object, :basic_method).with(4, 5, 6).on_call { |call|
+  basic_method_called_with = call
+}
+
+my_object.basic_method(4, 5, 6)
+basic_method_called_with.args
+  # => [4,5,6]
+
+iterator_method_called_with = nil
 MuchStub.(my_object, :iterator_method) { |*args, &block|
-  iterator_method_call_args = args
-  iterator_method_call_block = block
+  iterator_method_called_with = MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.(my_object, :iterator_method).on_call { |call|
+  iterator_method_called_with = call
 }
 
 my_object.iterator_method([1, 2, 3], &:to_s)
-iterator_method_call_args
+iterator_method_called_with.args
   # => [[1, 2, 3]]
-iterator_method_call_block
+iterator_method_called_with.block
   # => #<Proc:0x00007fb083a6feb0(&:to_s)>
 
 # Count method calls for spying.
@@ -145,13 +164,17 @@ basic_method_call_count
 
 basic_method_calls = []
 MuchStub.(my_object, :basic_method) { |*args|
-  basic_method_calls << args
+  basic_method_calls << MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.(my_object, :basic_method).on_call { |call|
+  basic_method_calls << call
 }
 
 my_object.basic_method(123)
 basic_method_calls.size
   # => 1
-basic_method_calls.first
+basic_method_calls.first.args
   # => [123]
 ```
 
@@ -218,12 +241,16 @@ basic_method_called_with
 
 basic_method_called_with = nil
 MuchStub.tap(my_object, :basic_method) { |value, *args|
-  basic_method_called_with = args
+  basic_method_called_with = MuchStub::Call.new(*args)
+}
+# OR
+MuchStub.tap_on_call(my_object, :basic_method) { |value, call|
+  basic_method_called_with = call
 }
 
 my_object.basic_method(123)
   # => "123"
-basic_method_called_with
+basic_method_called_with.args
   # => [123]
 ```
 
@@ -264,6 +291,39 @@ thing_built_with
   # => [123]
 thing.value
   # => 456
+```
+
+### `MuchStub.spy`
+
+Use the `.spy` method to spy on method calls. This is especially helpful for spying on _chained_ method calls.
+
+```ruby
+# Given this object/API
+
+myclass = Class.new do
+  def one; self; end
+  def two(val); self; end
+  def three; self; end
+  def ready?; false; end
+end
+myobj = myclass.new
+
+spy =
+  MuchStub.spy(myobj :one, :two, :three, ready?: true)
+
+assert_equal spy, myobj.one
+assert_equal spy, myobj.two("a")
+assert_equal spy, myobj.three
+
+assert_true myobj.one.two("b").three.ready?
+
+assert_kind_of MuchStub::CallSpy, spy
+assert_equal 2, spy.one_call_count
+assert_equal 2, spy.two_call_count
+assert_equal 2, spy.three_call_count
+assert_equal 1, spy.ready_predicate_call_count
+assert_equal ["b"], spy.two_last_called_with.args
+assert_true spy.ready_predicate_called?
 ```
 
 ## Installation
