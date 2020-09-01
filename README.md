@@ -116,6 +116,12 @@ MuchStub.(my_object, :basic_method) { |*args|
 MuchStub.(my_object, :basic_method).on_call { |call|
   basic_method_called_with = call
 }
+# OR
+MuchStub.on_call(my_object, :basic_method) { |call|
+  # MucStub.on_call(...) { ... } is equivalent to
+  # MuchStub.(...).on_call { ... }
+  basic_method_called_with = call
+}
 
 my_object.basic_method(123)
 basic_method_called_with.args

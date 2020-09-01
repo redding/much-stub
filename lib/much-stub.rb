@@ -18,14 +18,22 @@ module MuchStub
     return false
   end
 
-  def self.call(*args, &block)
-    self.stub(*args, &block)
-  end
-
   def self.stub(obj, meth, &block)
     key = self.stub_key(obj, meth)
     self.stubs[key] ||= MuchStub::Stub.new(obj, meth, caller_locations)
     self.stubs[key].tap{ |s| s.do = block }
+  end
+
+  def self.call(*args, &block)
+    self.stub(*args, &block)
+  end
+
+  def self.stub_on_call(*args, &on_call_block)
+    self.stub(*args).on_call(&on_call_block)
+  end
+
+  def self.on_call(*args, &on_call_block)
+    self.stub_on_call(*args, &on_call_block)
   end
 
   def self.unstub(obj, meth)

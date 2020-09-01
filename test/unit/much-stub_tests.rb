@@ -25,8 +25,30 @@ module MuchStub
       stub1 = MuchStub.(@myobj, :mymeth)
       assert_kind_of MuchStub::Stub, stub1
 
-      stub2 = MuchStub.call(@myobj, :mymeth)
+      stub2 = MuchStub.stub(@myobj, :mymeth)
       assert_kind_of MuchStub::Stub, stub2
+    end
+
+    should "build a stub with an on_call block" do
+      my_meth_called_with = nil
+      stub1 =
+        MuchStub.on_call(@myobj, :mymeth) { |call|
+          my_meth_called_with = call
+        }
+
+      @myobj.mymeth
+      assert_kind_of MuchStub::Stub, stub1
+      assert_equal [], my_meth_called_with.args
+
+      my_meth_called_with = nil
+      stub2 =
+        MuchStub.stub_on_call(@myobj, :mymeth) { |call|
+          my_meth_called_with = call
+        }
+
+      @myobj.mymeth
+      assert_kind_of MuchStub::Stub, stub2
+      assert_equal [], my_meth_called_with.args
     end
 
     should "lookup stubs that have been called before" do
