@@ -60,10 +60,10 @@ module MuchStub
   end
 
   def self.spy(obj, *meths, **return_values)
-    MuchStub::CallSpy.new(**return_values).tap do |spy|
+    MuchStub::CallSpy.new(**return_values).call_spy_tap do |spy|
       meths.each do |meth|
         self.stub(obj, meth) { |*args, &block|
-          spy.public_send(meth, *args, &block)
+          spy.__send__(meth, *args, &block)
         }
       end
     end

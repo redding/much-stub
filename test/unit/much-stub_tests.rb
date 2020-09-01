@@ -112,11 +112,13 @@ module MuchStub
           :one,
           :two,
           :three,
+          :to_s,
           ready?: true)
 
       assert_equal spy, myobj.one
       assert_equal spy, myobj.two("a")
       assert_equal spy, myobj.three
+      assert_equal spy, myobj.to_s
 
       assert_true myobj.one.two("b").three.ready?
 
@@ -124,6 +126,7 @@ module MuchStub
       assert_equal 2, spy.one_call_count
       assert_equal 2, spy.two_call_count
       assert_equal 2, spy.three_call_count
+      assert_equal 1, spy.to_s_call_count
       assert_equal 1, spy.ready_predicate_call_count
       assert_equal ["b"], spy.two_last_called_with.args
       assert_true spy.ready_predicate_called?

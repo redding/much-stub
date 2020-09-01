@@ -4,7 +4,7 @@ require "much-stub/call_spy"
 require "test/support/factory"
 
 class MuchStub::CallSpy
-  class UnitTests < Assert::Context
+  class UnitTests < ::Assert::Context
     desc "MuchStub::CallSpy"
     setup do
       @unit_class = MuchStub::CallSpy
@@ -19,7 +19,7 @@ class MuchStub::CallSpy
     subject{ @spy }
 
     should "spy on method calls and return itself" do
-      assert_false subject.respond_to?(:get)
+      assert_true subject.respond_to?(:get)
 
       assert_equal [], subject.get_calls
       assert_nil subject.get_last_called_with
