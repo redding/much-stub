@@ -93,4 +93,16 @@ class MuchStub::CallSpy
       assert_equal @result, subject.get.set!("value1").any?
     end
   end
+
+  class InitWithNilReturnValuesTests < UnitTests
+    desc "when init with nil return values"
+    setup do
+      @spy = @unit_class.new(result: nil)
+    end
+    subject{ @spy }
+
+    should "return nil" do
+      assert_equal "nil", subject.get.set!("value1").result.inspect
+    end
+  end
 end
