@@ -54,10 +54,8 @@ module MuchStub
     end
 
     def call_spy_return_value_proc(method_name)
-      value = @call_spy_return_values[method_name]
-      return value if value.respond_to?(:call)
-
-      ::Proc.new { value.nil? ? self : value }
+      value = @call_spy_return_values.fetch(method_name, ::Proc.new { self })
+      value.respond_to?(:call) ? value : ::Proc.new { value }
     end
 
     def call_spy_normalize_method_name(name)
