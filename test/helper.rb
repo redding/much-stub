@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # this file is automatically required when you run `assert`
 # put any test helpers here
 

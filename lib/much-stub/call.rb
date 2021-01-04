@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MuchStub
   class Call
     attr_reader :pargs, :kargs, :block
