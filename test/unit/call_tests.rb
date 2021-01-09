@@ -14,9 +14,9 @@ class MuchStub::Call
       @pargs = [Factory.string, Factory.integer]
       @kargs = {
         one: 1,
-        two: 2
+        two: 2,
       }
-      @block = -> {}
+      @block = ->{}
     end
   end
 
