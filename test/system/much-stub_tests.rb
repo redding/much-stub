@@ -57,15 +57,15 @@ module MuchStub
     end
 
     should "not allow stubbing methods with invalid arity" do
-      assert_raises{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_raises{ MuchStub.stub(subject, :withargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_raises{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :minargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "not allow calling methods with invalid arity" do
@@ -130,15 +130,15 @@ module MuchStub
     end
 
     should "not allow stubbing methods with invalid arity" do
-      assert_raises{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_raises{ MuchStub.stub(subject, :withargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_raises{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :minargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "not allow calling methods with invalid arity" do
@@ -203,15 +203,15 @@ module MuchStub
     end
 
     should "not allow stubbing methods with invalid arity" do
-      assert_raises{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_raises{ MuchStub.stub(subject, :withargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_raises{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :minargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "not allow calling methods with invalid arity" do
@@ -276,15 +276,15 @@ module MuchStub
     end
 
     should "not allow stubbing methods with invalid arity" do
-      assert_raises{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_raises{ MuchStub.stub(subject, :withargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_raises{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :minargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "not allow calling methods with invalid arity" do
@@ -350,15 +350,15 @@ module MuchStub
     end
 
     should "not allow stubbing methods with invalid arity" do
-      assert_raises{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_raises{ MuchStub.stub(subject, :withargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_raises{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :minargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "not allow calling methods with invalid arity" do
@@ -423,15 +423,15 @@ module MuchStub
     end
 
     should "not allow stubbing methods with invalid arity" do
-      assert_raises{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_raises{ MuchStub.stub(subject, :withargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_raises{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :minargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "not allow calling methods with invalid arity" do
@@ -497,15 +497,15 @@ module MuchStub
     end
 
     should "not allow stubbing methods with invalid arity" do
-      assert_raises{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_raises{ MuchStub.stub(subject, :withargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_raises{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_raises{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :minargs).with{} }
+      assert_raises{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_raises{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_raises{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "not allow calling methods with invalid arity" do
@@ -570,15 +570,15 @@ module MuchStub
     end
 
     should "allow stubbing methods with invalid arity" do
-      assert_nothing_raised{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with{} }
+      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with{} }
+      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_nothing_raised{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "allow calling methods with invalid arity" do
@@ -643,15 +643,15 @@ module MuchStub
     end
 
     should "allow stubbing methods with invalid arity" do
-      assert_nothing_raised{ MuchStub.stub(subject, :noargs).with(1){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :noargs).with(1){} }
 
-      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with{ } }
-      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with(1, 2){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with{} }
+      assert_nothing_raised{ MuchStub.stub(subject, :withargs).with(1, 2){} }
 
-      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with{ } }
-      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with(1){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with{} }
+      assert_nothing_raised{ MuchStub.stub(subject, :minargs).with(1){} }
 
-      assert_nothing_raised{ MuchStub.stub(subject, :withblock).with(1){ } }
+      assert_nothing_raised{ MuchStub.stub(subject, :withblock).with(1){} }
     end
 
     should "allow calling methods with invalid arity" do
@@ -684,37 +684,73 @@ module MuchStub
   end
 
   class TestClass
-    def self.noargs; end
-    def self.withargs(a); end
-    def self.anyargs(*args); end
-    def self.minargs(a, b, *args); end
-    def self.withblock(&block); end
+    def self.noargs
+    end
 
-    def noargs; end
-    def withargs(a); end
-    def anyargs(*args); end
-    def minargs(a, b, *args); end
-    def withblock(&block); end
+    def self.withargs(a)
+    end
+
+    def self.anyargs(*args)
+    end
+
+    def self.minargs(a, b, *args)
+    end
+
+    def self.withblock(&block)
+    end
+
+    def noargs
+    end
+
+    def withargs(a)
+    end
+
+    def anyargs(*args)
+    end
+
+    def minargs(a, b, *args)
+    end
+
+    def withblock(&block)
+    end
   end
 
   module TestModule
-    def self.noargs; end
-    def self.withargs(a); end
-    def self.anyargs(*args); end
-    def self.minargs(a, b, *args); end
-    def self.withblock(&block); end
+    def self.noargs
+    end
+
+    def self.withargs(a)
+    end
+
+    def self.anyargs(*args)
+    end
+
+    def self.minargs(a, b, *args)
+    end
+
+    def self.withblock(&block)
+    end
   end
 
   module TestMixin
-    def noargs; end
-    def withargs(a); end
-    def anyargs(*args); end
-    def minargs(a, b, *args); end
-    def withblock(&block); end
+    def noargs
+    end
+
+    def withargs(a)
+    end
+
+    def anyargs(*args)
+    end
+
+    def minargs(a, b, *args)
+    end
+
+    def withblock(&block)
+    end
   end
 
   class DelegateClass
-    def self.respond_to?(*args)
+    def self.respond_to_missing?(*args)
       TestClass.respond_to?(*args) || super
     end
 
@@ -726,7 +762,7 @@ module MuchStub
       @delegate = TestClass.new
     end
 
-    def respond_to?(*args)
+    def respond_to_missing?(*args)
       @delegate.respond_to?(*args) || super
     end
 

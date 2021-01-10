@@ -6,14 +6,14 @@ module MuchStub
   class CallSpy < ::BasicObject
     METHOD_NAME_REPLACEMENTS = {
       "!" => "_bang",
-      "?" => "_predicate"
+      "?" => "_predicate",
     }.freeze
 
     def initialize(**return_values)
-      @call_spy_return_values = return_values.transform_keys{ |key| key.to_s }
-      @call_spy_method_calls = ::Hash.new { |hash, key| hash[key] = [] }
+      @call_spy_return_values = return_values.transform_keys(&:to_s)
+      @call_spy_method_calls = ::Hash.new{ |hash, key| hash[key] = [] }
       @call_spy_method_return_values =
-        ::Hash.new { |hash, key| hash[key] = call_spy_return_value_proc(key) }
+        ::Hash.new{ |hash, key| hash[key] = call_spy_return_value_proc(key) }
     end
 
     def call_spy_tap
@@ -22,23 +22,23 @@ module MuchStub
     end
 
     def ==(other)
-      self.equal?(other)
+      equal?(other)
     end
 
     def ===(other)
-      self.equal?(other)
+      equal?(other)
     end
 
     def eql?(other)
-      self.equal?(other)
+      equal?(other)
     end
 
     def equal?(other)
-      self.__id__ == other.__id__
+      __id__ == other.__id__
     end
 
     def hash
-      self.__id__
+      __id__
     end
 
     def respond_to?(*)
@@ -46,7 +46,7 @@ module MuchStub
     end
 
     def inspect
-      "#<MuchStub::CallSpy:#{"0x0%x" % (self.__id__ << 1)}>"
+      "#<MuchStub::CallSpy:#{"0x0%x" % (__id__ << 1)}>"
     end
 
     private
@@ -56,14 +56,14 @@ module MuchStub
     end
 
     def call_spy_return_value_proc(method_name)
-      value = @call_spy_return_values.fetch(method_name, ::Proc.new { self })
-      value.respond_to?(:call) ? value : ::Proc.new { value }
+      value = @call_spy_return_values.fetch(method_name, ::Proc.new{ self })
+      value.respond_to?(:call) ? value : ::Proc.new{ value }
     end
 
     def call_spy_normalize_method_name(name)
-      METHOD_NAME_REPLACEMENTS.reduce(name.to_s) { |acc, (source, replacement)|
+      METHOD_NAME_REPLACEMENTS.reduce(name.to_s) do |acc, (source, replacement)|
         acc.gsub(source, replacement)
-      }
+      end
     end
 
     def call_spy_define_spied_method(name)
@@ -79,7 +79,9 @@ module MuchStub
       spied_method_name = query_method_match[1]
       query_method_suffix = query_method_match[2]
       method_name = call_spy_normalize_method_name(spied_method_name)
-      call_spy_define_metaclass_method("#{method_name}#{query_method_suffix}") do
+      call_spy_define_metaclass_method(
+        "#{method_name}#{query_method_suffix}",
+      ) do
         yield(method_name) if ::Kernel.block_given?
       end
     end
@@ -89,36 +91,35 @@ module MuchStub
       metaclass.define_method(name, &block)
     end
 
+    def respond_to_missing?(_name, *_args)
+      false
+    end
+
     def method_missing(name, *args, &block)
       if (match = name.match(/(\w+)(_calls)\z/))
         call_spy_define_query_method(match) do |method_name|
           @call_spy_method_calls[method_name]
         end
-        self.__send__(name, *args, &block)
       elsif (match = name.match(/(\w+)(_last_called_with)\z/))
         call_spy_define_query_method(match) do |method_name|
-          self.__send__("#{method_name}_calls").last
+          __send__("#{method_name}_calls").last
         end
-        self.__send__(name, *args, &block)
       elsif (match = name.match(/(\w+)(_called_with)\z/))
         call_spy_define_query_method(match) do |method_name|
-          self.__send__("#{method_name}_last_called_with")
+          __send__("#{method_name}_last_called_with")
         end
-        self.__send__(name, *args, &block)
       elsif (match = name.match(/(\w+)(_call_count)\z/))
         call_spy_define_query_method(match) do |method_name|
-          self.__send__("#{method_name}_calls").size
+          __send__("#{method_name}_calls").size
         end
-        self.__send__(name, *args, &block)
       elsif (match = name.match(/(\w+)(_called\?)\z/))
         call_spy_define_query_method(match) do |method_name|
-          self.__send__("#{method_name}_call_count") > 0
+          __send__("#{method_name}_call_count") > 0
         end
-        self.__send__(name, *args, &block)
       else
         call_spy_define_spied_method(name)
-        self.__send__(name, *args, &block)
       end
+      __send__(name, *args, &block)
     end
   end
 end

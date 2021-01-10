@@ -75,7 +75,8 @@ class MuchStub::CallSpy
     end
     subject{ @spy }
 
-    should "return the given values instead of itself if that method is called" do
+    should "return the given values instead of itself if that method is "\
+           "called" do
       assert_false subject.get.set!("value1").any?
       assert_true subject.get_called?
       assert_equal ["value1"], subject.set_bang_called_with.args
@@ -87,7 +88,7 @@ class MuchStub::CallSpy
     desc "when init with return value procs"
     setup do
       @result = Factory.boolean
-      @spy = @unit_class.new(any?: ->(call) { @result })
+      @spy = @unit_class.new(any?: ->(_call){ @result })
     end
     subject{ @spy }
 

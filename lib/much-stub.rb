@@ -15,66 +15,69 @@ module MuchStub
   end
 
   def self.arity_matches?(method, args)
-    return true if method.arity == args.size # mandatory args
-    return true if method.arity < 0 && args.size >= (method.arity+1).abs # variable args
-    return false
+    # mandatory args
+    return true if method.arity == args.size
+    # variable args
+    return true if method.arity < 0 && args.size >= (method.arity + 1).abs
+
+    false
   end
 
   def self.stub(obj, meth, &block)
-    key = self.stub_key(obj, meth)
-    self.stubs[key] ||= MuchStub::Stub.new(obj, meth, caller_locations)
-    self.stubs[key].tap{ |s| s.do = block }
+    key = stub_key(obj, meth)
+    stubs[key] ||= MuchStub::Stub.new(obj, meth, caller_locations)
+    stubs[key].tap{ |s| s.do = block }
   end
 
   def self.call(*args, &block)
-    self.stub(*args, &block)
+    stub(*args, &block)
   end
 
   def self.stub_on_call(*args, &on_call_block)
-    self.stub(*args).on_call(&on_call_block)
+    stub(*args).on_call(&on_call_block)
   end
 
   def self.on_call(*args, &on_call_block)
-    self.stub_on_call(*args, &on_call_block)
+    stub_on_call(*args, &on_call_block)
   end
 
   def self.unstub(obj, meth)
-    key = self.stub_key(obj, meth)
-    (self.stubs.delete(key) || MuchStub::NullStub.new).teardown
+    key = stub_key(obj, meth)
+    (stubs.delete(key) || MuchStub::NullStub.new).teardown
   end
 
   def self.unstub!
-    self.stubs.keys.each{ |key| self.stubs.delete(key).teardown }
+    stubs.keys.each{ |key| stubs.delete(key).teardown }
   end
 
   def self.stub_send(obj, meth, *args, &block)
     orig_caller = caller_locations
-    stub = self.stubs.fetch(MuchStub::Stub.key(obj, meth)) do
+    stub = stubs.fetch(MuchStub::Stub.key(obj, meth)) do
       raise NotStubbedError, "`#{meth}` not stubbed.", orig_caller.map(&:to_s)
     end
     stub.call_method(args, &block)
   end
 
   def self.tap(obj, meth, &tap_block)
-    self.stub(obj, meth) { |*args, &block|
-      self.stub_send(obj, meth, *args, &block).tap { |value|
-        tap_block.call(value, *args, &block) if tap_block
-      }
-    }
+    stub(obj, meth) do |*args, &block|
+      stub_send(obj, meth, *args, &block).tap do |value|
+        tap_block&.call(value, *args, &block)
+      end
+    end
   end
 
   def self.tap_on_call(obj, meth, &on_call_block)
-    self.tap(obj, meth) { |value, *args, &block|
-      on_call_block.call(value, MuchStub::Call.new(*args, &block)) if on_call_block
-    }
+    tap(obj, meth) do |value, *args, &block|
+      on_call_block&.call(value, MuchStub::Call.new(*args, &block))
+    end
   end
 
   def self.spy(obj, *meths, **return_values)
     MuchStub::CallSpy.new(**return_values).call_spy_tap do |spy|
       meths.each do |meth|
-        self.stub(obj, meth) { |*args, &block|
+        stub(obj, meth) do |*args, &block|
           spy.__send__(meth, *args, &block)
-        }
+        end
       end
     end
   end
@@ -116,7 +119,9 @@ module MuchStub
             @method,
             args,
             method_name: @method_name,
-            backtrace: orig_caller))
+            backtrace: orig_caller,
+          ),
+        )
       end
       lookup(args, orig_caller).call(*args, &block)
     rescue NotStubbedError
@@ -132,7 +137,9 @@ module MuchStub
             @method,
             args,
             method_name: @method_name,
-            backtrace: orig_caller))
+            backtrace: orig_caller,
+          ),
+        )
       end
       @lookup[args] = block
       self
@@ -140,12 +147,12 @@ module MuchStub
 
     def on_call(&on_call_block)
       stub_block =
-        ->(*args, &block) {
-          on_call_block.call(MuchStub::Call.new(*args, &block)) if on_call_block
+        ->(*args, &block){
+          on_call_block&.call(MuchStub::Call.new(*args, &block))
         }
       if @lookup.empty?
         @do = stub_block
-      elsif @lookup.has_value?(nil)
+      elsif @lookup.value?(nil)
         @lookup.transform_values!{ |value| value.nil? ? stub_block : value }
       end
       self
@@ -159,7 +166,7 @@ module MuchStub
     end
 
     def inspect
-      "#<#{self.class}:#{"0x0%x" % (object_id << 1)}" \
+      "#<#{self.class}:#{format("0x0%x", (object_id << 1))}" \
       " @method_name=#{@method_name.inspect}" \
       ">"
     end
@@ -171,7 +178,7 @@ module MuchStub
         msg = "#{object.inspect} does not respond to `#{@method_name}`"
         raise StubError, msg, orig_caller.map(&:to_s)
       end
-      is_constant          = object.kind_of?(Module)
+      is_constant          = object.is_a?(Module)
       local_object_methods = object.methods(false).map(&:to_s)
       all_object_methods   = object.methods.map(&:to_s)
       if (is_constant && !local_object_methods.include?(@method_name)) ||
@@ -182,7 +189,8 @@ module MuchStub
         method
       end
 
-      if !local_object_methods.include?(@name) # already stubbed
+      # already stubbed
+      unless local_object_methods.include?(@name)
         @metaclass.send(:alias_method, @name, @method_name)
       end
       @method = object.method(@name)
@@ -196,19 +204,21 @@ module MuchStub
     end
 
     def lookup(args, orig_caller)
-      @lookup.fetch(args) {
-        self.do || begin
+      @lookup.fetch(args) do
+        self.do ||
+        begin
           msg = "#{inspect_call(args)} not stubbed."
           inspect_lookup_stubs.tap do |stubs|
-            msg += "\nStubs:\n#{stubs}" if !stubs.empty?
+            msg += "\nStubs:\n#{stubs}" unless stubs.empty?
           end
           raise NotStubbedError, msg, orig_caller.map(&:to_s)
         end
-      } ||
-        raise(
-          StubError,
-          "#{inspect_call(args)} stubbed with no block.",
-          orig_caller.map(&:to_s))
+      end ||
+      raise(
+        StubError,
+        "#{inspect_call(args)} stubbed with no block.",
+        orig_caller.map(&:to_s),
+      )
     end
 
     def inspect_lookup_stubs
@@ -244,9 +254,12 @@ module MuchStub
       end
     end
 
-  NullStub = Class.new do
-    def teardown; end # no-op
-  end
+  NullStub =
+    Class.new do
+      def teardown
+        # no-op
+      end
+    end
 
   module ParameterList
     LETTERS = ("a".."z").to_a.freeze
@@ -258,8 +271,6 @@ module MuchStub
       params << "&block"
       params.join(", ")
     end
-
-    private
 
     def self.get_arity(object, method_name)
       object.method(method_name).arity
