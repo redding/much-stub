@@ -200,6 +200,10 @@ module MuchStub
             [val1, val2, args]
           end
 
+          def mykargs(val1:, **kargs)
+            [val1, kargs]
+          end
+
           def myblk(&block)
             block.call
           end
@@ -422,46 +426,54 @@ module MuchStub
 
       # no args
       stub = MuchStub::Stub.new(@myobj, :mymeth){ "mymeth" }
-      assert_equal "mymeth", stub.call([])
-      assert_equal "meth",   stub.call_method([])
+      assert_equal "mymeth", stub.call
+      assert_equal "meth",   stub.call_method
 
       # static args
       stub = MuchStub::Stub.new(@myobj, :myval, &:to_s)
-      assert_equal "1", stub.call([1])
-      assert_equal 1,   stub.call_method([1])
-      assert_equal "2", stub.call([2])
-      assert_equal 2,   stub.call_method([2])
+      assert_equal "1", stub.call(1)
+      assert_equal 1,   stub.call_method(1)
+      assert_equal "2", stub.call(2)
+      assert_equal 2,   stub.call_method(2)
       stub.with(2){ "two" }
-      assert_equal "two", stub.call([2])
-      assert_equal 2,     stub.call_method([2])
+      assert_equal "two", stub.call(2)
+      assert_equal 2,     stub.call_method(2)
 
       # dynamic args
       stub = MuchStub::Stub.new(@myobj, :myargs){ |*args| args.join(",") }
-      assert_equal "1,2", stub.call([1, 2])
-      assert_equal [1, 2], stub.call_method([1, 2])
-      assert_equal "3,4,5", stub.call([3, 4, 5])
-      assert_equal [3, 4, 5], stub.call_method([3, 4, 5])
+      assert_equal "1,2", stub.call(1, 2)
+      assert_equal [1, 2], stub.call_method(1, 2)
+      assert_equal "3,4,5", stub.call(3, 4, 5)
+      assert_equal [3, 4, 5], stub.call_method(3, 4, 5)
       stub.with(3, 4, 5){ "three-four-five" }
-      assert_equal "three-four-five", stub.call([3, 4, 5])
-      assert_equal [3, 4, 5],           stub.call_method([3, 4, 5])
+      assert_equal "three-four-five", stub.call(3, 4, 5)
+      assert_equal [3, 4, 5], stub.call_method(3, 4, 5)
 
       # mixed static/dynamic args
       stub = MuchStub::Stub.new(@myobj, :myvalargs){ |*args| args.join(",") }
-      assert_equal "1,2,3", stub.call([1, 2, 3])
-      assert_equal [1, 2, [3]], stub.call_method([1, 2, 3])
-      assert_equal "3,4,5", stub.call([3, 4, 5])
-      assert_equal [3, 4, [5]], stub.call_method([3, 4, 5])
+      assert_equal "1,2,3", stub.call(1, 2, 3)
+      assert_equal [1, 2, [3]], stub.call_method(1, 2, 3)
+      assert_equal "3,4,5", stub.call(3, 4, 5)
+      assert_equal [3, 4, [5]], stub.call_method(3, 4, 5)
       stub.with(3, 4, 5){ "three-four-five" }
-      assert_equal "three-four-five", stub.call([3, 4, 5])
-      assert_equal [3, 4, [5]], stub.call_method([3, 4, 5])
+      assert_equal "three-four-five", stub.call(3, 4, 5)
+      assert_equal [3, 4, [5]], stub.call_method(3, 4, 5)
+
+      # keyword args
+      stub = MuchStub::Stub.new(@myobj, :mykargs){ |**kargs| kargs.inspect }
+      assert_equal "{:val1=>1, :val2=>2}", stub.call(val1: 1, val2: 2)
+      assert_equal [1, { val2: 2 }], stub.call_method(val1: 1, val2: 2)
+      stub.with(val1: 3, val2: 4){ "three-four" }
+      assert_equal "three-four", stub.call(val1: 3, val2: 4)
+      assert_equal [3, { val2: 4 }], stub.call_method(val1: 3, val2: 4)
 
       # blocks
       blkcalled = false
       blk = proc{ blkcalled = true }
       stub = MuchStub::Stub.new(@myobj, :myblk){ blkcalled = "true" }
-      stub.call([], &blk)
+      stub.call(&blk)
       assert_equal "true", blkcalled
-      stub.call_method([], &blk)
+      stub.call_method(&blk)
       assert_equal true, blkcalled
     end
 
@@ -500,7 +512,7 @@ module MuchStub
     subject{ @stub }
 
     should "not raise a stub error when called" do
-      assert_nothing_raised{ @stub.call([@arg]) }
+      assert_nothing_raised{ @stub.call(@arg) }
     end
   end
 
@@ -564,7 +576,7 @@ module MuchStub
     end
 
     should "build a parameter list for a method that takes any args" do
-      assert_equal "*args, &block", subject.new(@object, "anyargs")
+      assert_equal "*pargs, **kargs, &block", subject.new(@object, "anyargs")
     end
 
     should "build a parameter list for a method that takes many args" do
@@ -574,7 +586,8 @@ module MuchStub
 
     should "build a parameter list for a method that takes a minimum number "\
            "of args" do
-      expected = "#{ParameterList::LETTERS.join(", ")}, aa, *args, &block"
+      expected =
+        "#{ParameterList::LETTERS.join(", ")}, aa, *pargs, **kargs, &block"
       assert_equal expected, subject.new(@object, "minargs")
     end
   end
