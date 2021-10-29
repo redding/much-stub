@@ -50,34 +50,34 @@ module MuchStub
     stubs.keys.each{ |key| stubs.delete(key).teardown }
   end
 
-  def self.stub_send(obj, meth, *args, &block)
+  def self.stub_send(obj, meth, *pargs, **kargs, &block)
     orig_caller = caller_locations
     stub =
       stubs.fetch(MuchStub::Stub.key(obj, meth)) do
         raise NotStubbedError, "`#{meth}` not stubbed.", orig_caller.map(&:to_s)
       end
-    stub.call_method(args, &block)
+    stub.call_method(*pargs, **kargs, &block)
   end
 
   def self.tap(obj, meth, &tap_block)
-    stub(obj, meth) do |*args, &block|
-      stub_send(obj, meth, *args, &block).tap do |value|
-        tap_block&.call(value, *args, &block)
+    stub(obj, meth) do |*pargs, **kargs, &block|
+      stub_send(obj, meth, *pargs, **kargs, &block).tap do |value|
+        tap_block&.call(value, *pargs, **kargs, &block)
       end
     end
   end
 
   def self.tap_on_call(obj, meth, &on_call_block)
-    tap(obj, meth) do |value, *args, &block|
-      on_call_block&.call(value, MuchStub::Call.new(*args, &block))
+    tap(obj, meth) do |value, *pargs, **kargs, &block|
+      on_call_block&.call(value, MuchStub::Call.new(*pargs, **kargs, &block))
     end
   end
 
   def self.spy(obj, *meths, **return_values)
     MuchStub::CallSpy.new(**return_values).call_spy_tap do |spy|
       meths.each do |meth|
-        stub(obj, meth) do |*args, &block|
-          spy.__send__(meth, *args, &block)
+        stub(obj, meth) do |*pargs, **kargs, &block|
+          spy.__send__(meth, *pargs, **kargs, &block)
         end
       end
     end
@@ -108,12 +108,13 @@ module MuchStub
       @do = block || @do
     end
 
-    def call_method(args, &block)
-      @method.call(*args, &block)
+    def call_method(*pargs, **kargs, &block)
+      @method.call(*pargs, **kargs, &block)
     end
 
-    def call(args, orig_caller = nil, &block)
+    def call(*pargs, orig_caller: nil, **kargs, &block)
       orig_caller ||= caller_locations
+      args = combined_args(pargs, kargs)
       unless MuchStub.arity_matches?(@method, args)
         raise(
           StubArityError.new(
@@ -124,14 +125,15 @@ module MuchStub
           ),
         )
       end
-      lookup(args, orig_caller).call(*args, &block)
+      lookup(pargs, kargs, orig_caller).call(*pargs, **kargs, &block)
     rescue NotStubbedError
       @lookup.rehash
-      lookup(args, orig_caller).call(*args, &block)
+      lookup(pargs, kargs, orig_caller).call(*pargs, **kargs, &block)
     end
 
-    def with(*args, &block)
+    def with(*pargs, **kargs, &block)
       orig_caller = caller_locations
+      args = combined_args(pargs, kargs)
       unless MuchStub.arity_matches?(@method, args)
         raise(
           StubArityError.new(
@@ -148,8 +150,8 @@ module MuchStub
 
     def on_call(&on_call_block)
       stub_block =
-        ->(*args, &block){
-          on_call_block&.call(MuchStub::Call.new(*args, &block))
+        ->(*pargs, **kargs, &block){
+          on_call_block&.call(MuchStub::Call.new(*pargs, **kargs, &block))
         }
       if @lookup.empty?
         @do = stub_block
@@ -198,13 +200,16 @@ module MuchStub
 
       MuchStub.instance_variable_set(@ivar_name, self)
       @metaclass.class_eval <<-stub_method
-        def #{@method_name}(*args, &block)
-          MuchStub.instance_variable_get("#{@ivar_name}").call(args, caller_locations, &block)
+        def #{@method_name}(*pargs, **kargs, &block)
+          MuchStub
+            .instance_variable_get("#{@ivar_name}")
+            .call(*pargs, orig_caller: caller_locations, **kargs, &block)
         end
       stub_method
     end
 
-    def lookup(args, orig_caller)
+    def lookup(pargs, kargs, orig_caller)
+      args = combined_args(pargs, kargs)
       @lookup.fetch(args) do
         self.do ||
         begin
@@ -228,6 +233,10 @@ module MuchStub
 
     def inspect_call(args)
       "`#{@method_name}(#{args.map(&:inspect).join(",")})`"
+    end
+
+    def combined_args(pargs, kargs)
+      [*pargs, (kargs.empty? ? nil : kargs)].compact
     end
   end
 
@@ -268,7 +277,7 @@ module MuchStub
     def self.new(object, method_name)
       arity = get_arity(object, method_name)
       params = build_params_from_arity(arity)
-      params << "*args" if arity < 0
+      params << "*pargs, **kargs" if arity < 0
       params << "&block"
       params.join(", ")
     end
