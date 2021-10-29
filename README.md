@@ -16,15 +16,16 @@ Note: this was originally implemented in and extracted from [Assert](https://git
 ```ruby
 # Given this object/API
 
-my_class = Class.new do
-  def my_method
-    "my-method"
-  end
+my_class =
+  Class.new do
+    def my_method
+      "my-method"
+    end
 
-  def my_value(value)
-    value
+    def my_value(value)
+      value
+    end
   end
-end
 my_object = my_class.new
 
 my_object.my_method
@@ -95,15 +96,16 @@ my_object.my_value(456)
 ```ruby
 # Given this object/API
 
-my_class = Class.new do
-  def basic_method(value)
-    value
-  end
+my_class =
+  Class.new do
+    def basic_method(value)
+      value
+    end
 
-  def iterator_method(items, &block)
-    items.each(&block)
+    def iterator_method(items, &block)
+      items.each(&block)
+    end
   end
-end
 my_object = my_class.new
 
 # Store method call arguments/blocks for spying.
@@ -189,11 +191,12 @@ basic_method_calls.first.args
 ```ruby
 # Given this object/API ...
 
-my_class = Class.new do
-  def build_thing(thing_value);
-    Thing.new(value)
+my_class =
+  Class.new do
+    def build_thing(thing_value);
+      Thing.new(value)
+    end
   end
-end
 my_object = my_class.new
 
 # ... and this Test Double.
@@ -223,11 +226,12 @@ Use the `.tap` method to spy on method calls while preserving the original metho
 ```ruby
 # Given this object/API
 
-my_class = Class.new do
-  def basic_method(value)
-    value.to_s
+my_class =
+  Class.new do
+    def basic_method(value)
+      value.to_s
+    end
   end
-end
 my_object = my_class.new
 
 # Normal stubs override the original behavior and return value...
@@ -275,11 +279,12 @@ class Thing
   end
 end
 
-my_class = Class.new do
-  def thing(value)
-    Thing.new(value)
+my_class =
+  Class.new do
+    def thing(value)
+      Thing.new(value)
+    end
   end
-end
 my_object = my_class.new
 
 # Use `MuchStub.tap` to stub any thing instances created by `my_object.thing`
@@ -306,16 +311,16 @@ Use the `.spy` method to spy on method calls. This is especially helpful for spy
 ```ruby
 # Given this object/API
 
-myclass = Class.new do
-  def one; self; end
-  def two(val); self; end
-  def three; self; end
-  def ready?; false; end
-end
+myclass =
+  Class.new do
+    def one; self; end
+    def two(val); self; end
+    def three; self; end
+    def ready?; false; end
+  end
 myobj = myclass.new
 
-spy =
-  MuchStub.spy(myobj :one, :two, :three, ready?: true)
+spy = MuchStub.spy(myobj :one, :two, :three, ready?: true)
 
 assert_equal spy, myobj.one
 assert_equal spy, myobj.two("a")

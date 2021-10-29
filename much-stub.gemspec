@@ -25,7 +25,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.required_ruby_version = "~> 2.5"
+  gem.required_ruby_version = ">= 2.5"
 
   gem.add_development_dependency("assert",           ["~> 2.19.2"])
   gem.add_development_dependency("much-style-guide", ["~> 0.6.0"])
