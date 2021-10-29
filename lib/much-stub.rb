@@ -52,9 +52,10 @@ module MuchStub
 
   def self.stub_send(obj, meth, *args, &block)
     orig_caller = caller_locations
-    stub = stubs.fetch(MuchStub::Stub.key(obj, meth)) do
-      raise NotStubbedError, "`#{meth}` not stubbed.", orig_caller.map(&:to_s)
-    end
+    stub =
+      stubs.fetch(MuchStub::Stub.key(obj, meth)) do
+        raise NotStubbedError, "`#{meth}` not stubbed.", orig_caller.map(&:to_s)
+      end
     stub.call_method(args, &block)
   end
 

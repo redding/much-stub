@@ -16,15 +16,16 @@ module MuchStub
       @orig_value = Factory.string
       @stub_value = Factory.string
 
-      @myclass = Class.new do
-        def initialize(value)
-          @value = value
-        end
+      @myclass =
+        Class.new do
+          def initialize(value)
+            @value = value
+          end
 
-        def mymeth
-          @value
+          def mymeth
+            @value
+          end
         end
-      end
       @myobj = @myclass.new(@orig_value)
     end
 
@@ -130,23 +131,24 @@ module MuchStub
     end
 
     should "be able to add a stubbed spy" do
-      myclass = Class.new do
-        def one
-          self
-        end
+      myclass =
+        Class.new do
+          def one
+            self
+          end
 
-        def two(_val)
-          self
-        end
+          def two(_val)
+            self
+          end
 
-        def three
-          self
-        end
+          def three
+            self
+          end
 
-        def ready?
-          false
+          def ready?
+            false
+          end
         end
-      end
       myobj = myclass.new
 
       spy =
@@ -180,27 +182,28 @@ module MuchStub
   class StubTests < UnitTests
     desc "Stub"
     setup do
-      @myclass = Class.new do
-        def mymeth
-          "meth"
-        end
+      @myclass =
+        Class.new do
+          def mymeth
+            "meth"
+          end
 
-        def myval(val)
-          val
-        end
+          def myval(val)
+            val
+          end
 
-        def myargs(*args)
-          args
-        end
+          def myargs(*args)
+            args
+          end
 
-        def myvalargs(val1, val2, *args)
-          [val1, val2, args]
-        end
+          def myvalargs(val1, val2, *args)
+            [val1, val2, args]
+          end
 
-        def myblk(&block)
-          block.call
+          def myblk(&block)
+            block.call
+          end
         end
-      end
       @myobj = @myclass.new
 
       @stub = MuchStub::Stub.new(@myobj, :mymeth)
@@ -285,9 +288,10 @@ module MuchStub
     end
 
     should "complain if stubbed with mismatched arity" do
-      err = assert_raises(MuchStub::StubArityError) do
-        MuchStub::Stub.new(@myobj, :myval).with{ "myval" }
-      end
+      err =
+        assert_raises(MuchStub::StubArityError) do
+          MuchStub::Stub.new(@myobj, :myval).with{ "myval" }
+        end
       assert_includes "arity mismatch on", err.message
       assert_includes "test/unit/much-stub_tests.rb", err.backtrace.first
 
@@ -385,23 +389,24 @@ module MuchStub
     end
 
     should "stub methods even if they are not local to the object" do
-      mydelegatorclass = Class.new do
-        def initialize(delegateclass)
-          @delegate = delegateclass.new
-        end
+      mydelegatorclass =
+        Class.new do
+          def initialize(delegateclass)
+            @delegate = delegateclass.new
+          end
 
-        def respond_to?(meth)
-          @delegate.respond_to?(meth) || super
-        end
+          def respond_to?(meth)
+            @delegate.respond_to?(meth) || super
+          end
 
-        def method_missing(meth, *args, &block)
-          respond_to?(meth) ? @delegate.send(meth, *args, &block) : super
-        end
+          def method_missing(meth, *args, &block)
+            respond_to?(meth) ? @delegate.send(meth, *args, &block) : super
+          end
 
-        def respond_to_missing?(meth, _)
-          respond_to?(meth) || super
+          def respond_to_missing?(meth, _)
+            respond_to?(meth) || super
+          end
         end
-      end
       mydelegator = mydelegatorclass.new(@myclass)
 
       assert_equal [1, 2, [3]], mydelegator.myvalargs(1, 2, 3)
