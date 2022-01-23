@@ -236,7 +236,7 @@ module MuchStub
     end
 
     def combined_args(pargs, kargs)
-      [*pargs, (kargs.empty? ? nil : kargs)].compact
+      pargs + [(kargs.empty? ? nil : kargs)].compact
     end
   end
 

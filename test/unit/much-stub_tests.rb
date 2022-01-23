@@ -288,6 +288,7 @@ module MuchStub
       assert_raises(MuchStub::StubArityError){ @myobj.myvalargs }
       assert_raises(MuchStub::StubArityError){ @myobj.myvalargs(1) }
       assert_nothing_raised{ @myobj.myvalargs(1, 2) }
+      assert_nothing_raised{ @myobj.myvalargs(1, nil) }
       assert_nothing_raised{ @myobj.myvalargs(1, 2, 3) }
     end
 
